@@ -5,8 +5,8 @@
 // 3. Forecast API - to get weather forecast for a location
 
 // Base API configuration
-const API_BASE_URL = import.meta.env.VITE_WEATHER_API_BASE_URL // Replace with your actual API base URL
-const API_KEY = import.meta.env.VITE_WEATHER_API_KEY // Store your API key in .env file
+const API_BASE_URL = 'https://api.weatherapi.com/v1' // Replace with your actual API base URL
+const API_KEY = '4f35f087d4314cbb8a121104252607' // Store your API key in .env file
 
 // Debug: Check if API key is available
 if (!API_KEY || API_KEY === 'your_api_key_here') {
