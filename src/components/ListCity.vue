@@ -412,7 +412,7 @@ function openDialog() {
                             <span class="text-xl font-bold text-gray-900">{{ weatherData.location.displayName }}</span>
                             <span class="text-xs text-gray-500">{{ weatherData.location.region }}</span>
                         </div>
-                        <span class="text-xs text-gray-500 mt-1">Last updated: 
+                        <span class="text-xs text-gray-500 mt-1">
                             {{dayjs(weatherData.location.localtime).format('h:mm A') }}</span>
                         <div class="flex items-center gap-2 mt-2">
                             <img v-if="weatherData.current.condition.icon" :src="weatherData.current.condition.icon"
