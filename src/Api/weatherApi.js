@@ -17,7 +17,7 @@ if (!API_KEY || API_KEY === 'your_api_key_here') {
 const ENDPOINTS = {
   SEARCH: '/search.json',
   CURRENT: '/current.json',
-  FORECAST: '/forecast.json'
+  FORECAST: '/forecast.json',
 }
 
 // Helper function to make API calls
@@ -103,7 +103,7 @@ export async function getWeatherForecast(location, days = 5) {
   })
 }
 
-// Combined API - Get both current weather and forecast in one call
+// Combined API - Get both current weather and forecast and in one call
 export async function getWeatherData(location, days = 5) {
   if (!location) {
     throw new Error('Location is required')
@@ -117,6 +117,12 @@ export async function getWeatherData(location, days = 5) {
   })
 }
 
+// Fetch timezone info for a location
+export async function getTimezone(location) {
+  if (!location) throw new Error('Location is required');
+  return makeApiCall(ENDPOINTS.TIMEZONE, { q: location });
+}
+
 // Helper function to format location data for consistency
 export function formatLocationData(location) {
   return {
@@ -126,7 +132,9 @@ export function formatLocationData(location) {
     region: location.region,
     lat: location.lat,
     lon: location.lon,
-    displayName: location.name
+    displayName: location.name,
+    localtime: location.localtime,
+    tz_id: location.tz_id
   }
 }
 
@@ -151,7 +159,7 @@ export function formatWeatherData(weatherData) {
       feelslike_f: current.feelslike_f,
       uv: current.uv,
       last_updated: current.last_updated,
-      air_quality: current.air_quality
+      air_quality: current.air_quality,
     },
     forecast: forecast?.forecastday?.map(day => ({
       date: day.date,

@@ -4,6 +4,10 @@ import DetailWeather from './DetailWeather.vue'
 import { searchLocations, getWeatherData, formatWeatherData } from '../Api/weatherApi.js'
 import search from '@/assets/search-city.png'
 import { useToast } from 'vue-toastification'
+import dayjs from 'dayjs'
+
+
+
 
 //toast notification
 const toast = useToast()
@@ -20,6 +24,8 @@ const searchError = ref(null)
 // Local storage state
 const savedLocations = ref([])
 const isUpdating = ref(false)
+
+
 
 // Load saved locations from localStorage
 function loadSavedLocations() {
@@ -216,24 +222,6 @@ async function performSearch(query) {
     }
 }
 
-// Format time to 12-hour format with AM/PM
-function formatTime(timeString) {
-    if (!timeString) return ''
-
-    try {
-        const time = timeString.slice(11, 16) // Get HH:MM
-        const [hours, minutes] = time.split(':')
-        const hour = parseInt(hours)
-        const ampm = hour >= 12 ? 'PM' : 'AM'
-        const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
-
-        return `${displayHour}:${minutes} ${ampm}`
-    } catch (error) {
-        console.error('Error formatting time:', error)
-        return timeString.slice(11, 16) // Fallback to original format
-    }
-}
-
 // Watch for search query changes
 watch(searchQuery, (newQuery) => {
     console.log('Search query changed to:', newQuery)
@@ -264,6 +252,7 @@ async function fetchWeatherData(location) {
         const formattedData = formatWeatherData(data)
         console.log('Formatted weather data:', formattedData)
         weatherData.value = formattedData
+
     } catch (error) {
         console.error('Weather data error:', error)
         weatherError.value = error
@@ -285,11 +274,12 @@ watch(selectedLocation, (newLocation) => {
 
 // Initialize saved locations and start periodic updates
 onMounted(() => {
+    
     loadSavedLocations()
     loadSelectedLocation() // Load the previously selected location
 
-    // Update saved locations every 3 minutes
-    const updateInterval = setInterval(updateSavedLocations, 3 * 60 * 1000)
+    // Update saved locations every 1 minutes
+    const updateInterval = setInterval(updateSavedLocations, 1 * 60 * 1000)
 
     // Initial update after 1 second
     setTimeout(updateSavedLocations, 1000)
@@ -324,7 +314,7 @@ function selectLocation(location) {
 function openDialog() {
     if (weatherData.value) {
         selectedWeather.value = weatherData.value
-        showDialog.value = true
+  showDialog.value = true
     }
 }
 </script>
@@ -339,14 +329,14 @@ function openDialog() {
             </div>
 
             <!-- Search Input -->
-            <div class="relative flex items-center mb-6">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2">
+      <div class="relative flex items-center mb-6">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="w-5 h-5 text-gray-400">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                    </svg>
-                </span>
+          </svg>
+        </span>
                 <input type="text" v-model="searchQuery" placeholder="Search for a city or airport"
                     class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 bg-white text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200 text-base shadow-sm" />
 
@@ -382,8 +372,8 @@ function openDialog() {
                                 <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" />
                             </svg>
-                        </div>
-                        <div>
+      </div>
+      <div>
                             <h2 class="text-lg font-bold text-gray-900">Your Recently Searched Result</h2>
                             <p class="text-sm text-gray-500">Weather information for your search</p>
                         </div>
@@ -417,13 +407,13 @@ function openDialog() {
                         class="absolute top-3 right-12 text-xs text-gray-500 bg-gray-100 rounded px-2 py-0.5 font-mono">
                         {{ weatherData.location.country }}
                     </span>
-                    <div class="flex-1 px-5 py-4 flex flex-col justify-between">
-                        <div class="flex flex-row items-center gap-2">
+          <div class="flex-1 px-5 py-4 flex flex-col justify-between">
+            <div class="flex flex-row items-center gap-2">
                             <span class="text-xl font-bold text-gray-900">{{ weatherData.location.displayName }}</span>
                             <span class="text-xs text-gray-500">{{ weatherData.location.region }}</span>
                         </div>
-                        <span class="text-xs text-gray-500 mt-1">Last updated: {{
-                            formatTime(weatherData.current.last_updated) }}</span>
+                        <span class="text-xs text-gray-500 mt-1">Last updated: 
+                            {{dayjs(weatherData.location.localtime).format('h:mm A') }}</span>
                         <div class="flex items-center gap-2 mt-2">
                             <img v-if="weatherData.current.condition.icon" :src="weatherData.current.condition.icon"
                                 :alt="weatherData.current.condition.text" class="w-10 h-10" />
@@ -486,7 +476,7 @@ function openDialog() {
                             class="absolute bottom-3 right-3 px-3 py-1 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-colors">
                             Retry
                         </button>
-                    </div>
+          </div>
 
                     <!-- Weather data -->
                     <div v-else class="bg-white rounded-2xl overflow-hidden shadow flex items-center min-h-[110px] relative"
@@ -505,7 +495,7 @@ function openDialog() {
                         <span
                             class="absolute top-3 right-12 text-xs text-gray-500 bg-gray-100 rounded px-2 py-0.5 font-mono">
                             {{ location.weatherData.location.country }}
-                        </span>
+            </span>
 
                         <div class="flex-1 px-5 py-4 flex flex-col justify-between">
                             <div class="flex flex-row items-center gap-2">
@@ -514,8 +504,9 @@ function openDialog() {
                                 <span class="text-xs text-gray-500">{{ location.weatherData.location.region }}</span>
                             </div>
                             <div class="flex flex-row items-center gap-2">
-                                <span class="text-xs text-gray-500">Last updated: {{
-                                    formatTime(location.weatherData.current.last_updated) }}</span>
+                                <span class="text-xs text-gray-500"> 
+                                    {{ dayjs(location.weatherData.location.localtime).format('h:mm A') }}
+                                </span>
                             </div>
                             <div class="flex items-center gap-2 mt-2">
                                 <img v-if="location.weatherData.current.condition.icon"
@@ -536,10 +527,10 @@ function openDialog() {
                                 <span class="text-xs text-gray-500">Feels like {{
                                     location.weatherData.current.feelslike_c || '--' }}°</span>
                             </div>
-                        </div>
-                    </div>
-                </div>
             </div>
+          </div>
+        </div>
+      </div>
 
 
 
@@ -548,9 +539,9 @@ function openDialog() {
                 <img :src="search" alt="search" class="w-full h-full">
             </div>
 
-            <DetailWeather :visible="showDialog" :weather="selectedWeather" @close="showDialog = false" />
-        </div>
+      <DetailWeather :visible="showDialog" :weather="selectedWeather" @close="showDialog = false" />
     </div>
+  </div>
 </template>
 
 <style></style>

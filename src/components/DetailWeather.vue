@@ -1,61 +1,54 @@
 <script setup>
 import { defineProps, defineEmits, computed } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
+import dayjs from 'dayjs'
 
 const props = defineProps({
   visible: Boolean,
-  weather: Object
+  weather: Object,
 })
+
+const localTime = computed(() =>
+  dayjs(props.weather?.location?.localtime)
+)
+
 const emit = defineEmits(['close'])
 const emitClose = () => emit('close')
 
 // Format time to 12-hour format with AM/PM
 function formatTime(timeString) {
   if (!timeString) return ''
-  
+
   try {
-    const time = timeString.slice(11, 16) // Get HH:MM
+    const time = timeString.slice(11, 16)
     const [hours, minutes] = time.split(':')
     const hour = parseInt(hours)
     const ampm = hour >= 12 ? 'PM' : 'AM'
     const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
-    
+
     return `${displayHour}:${minutes} ${ampm}`
   } catch (error) {
     console.error('Error formatting time:', error)
-    return timeString.slice(11, 16) // Fallback to original format
+    return timeString.slice(11, 16)
   }
 }
 
 // Get hour display - show "Now" for current hour, then upcoming hours
 function getHourDisplay(timeString, index) {
-  if (!timeString) return ''
-  
+  if (!timeString || !localTime.value) return ''
+
   try {
-    // Get current hour
-    const now = new Date()
-    const currentHour = now.getHours()
-    
-    // Extract hour from time string
-    const hour = parseInt(timeString.slice(11, 13))
-    
-    // If this is the current hour, show "Now"
-    if (hour === currentHour) {
+    const currentHour = localTime.value.hour()
+    const forecastHour = parseInt(timeString.slice(11, 13))
+
+    if (forecastHour === currentHour && index === 0) {
       return 'Now'
     }
-    
-    // For other items, show the formatted time
-    const time = timeString.slice(11, 16) // Get HH:MM
-    const [hours, minutes] = time.split(':')
-    const hourInt = parseInt(hours)
-    
-    const ampm = hourInt >= 12 ? 'PM' : 'AM'
-    const displayHour = hourInt === 0 ? 12 : hourInt > 12 ? hourInt - 12 : hourInt
-    
-    return `${displayHour}:${minutes} ${ampm}`
+
+    return formatTime(timeString)
   } catch (error) {
     console.error('Error getting hour display:', error)
-    return index === 0 ? 'Now' : formatTime(timeString) // Fallback
+    return index === 0 ? 'Now' : formatTime(timeString)
   }
 }
 
@@ -81,30 +74,23 @@ const location = computed(() => weatherData.value?.location)
 const current = computed(() => weatherData.value?.current)
 const forecast = computed(() => weatherData.value?.forecast || [])
 const hourlyForecast = computed(() => {
-  const hours = forecast.value[0]?.hour || []
-  if (hours.length === 0) return []
-  
-  // Get current hour
-  const now = new Date()
-  const currentHour = now.getHours()
-  
-  // Find the index of the current hour or the next available hour
-  let startIndex = 0
-  for (let i = 0; i < hours.length; i++) {
-    const hourTime = hours[i].time
-    const hour = parseInt(hourTime.slice(11, 13)) // Extract hour from time string
-    
-    if (hour >= currentHour) {
-      startIndex = i
-      break
-    }
-  }
-  
-  // Return hours starting from current hour, up to 6 hours
-  return hours.slice(startIndex, startIndex + 6)
+  if (!localTime.value || !forecast.value.length) return []
+
+  const todayHours = forecast.value[0]?.hour || []
+  const tomorrowHours = forecast.value[1]?.hour || []
+  const allHours = [...todayHours, ...tomorrowHours]
+
+  const now = localTime.value
+  const startIndex = allHours.findIndex(h => {
+    return dayjs(h.time).isAfter(now) || dayjs(h.time).hour() === now.hour()
+  })
+
+  return allHours.slice(startIndex, startIndex + 6)
 })
 const airQuality = computed(() => current.value?.air_quality)
 const airQualityInfo = computed(() => getAirQualityInfo(airQuality.value))
+
+
 </script>
 
 <template>
@@ -151,8 +137,12 @@ const airQualityInfo = computed(() => getAirQualityInfo(airQuality.value))
                   class="w-5 h-5 md:w-7 md:h-7"
                 />
               </DialogTitle>
+
+              <div class="text-sm text-center text-gray-600">
+                {{ localTime?.format('dddd, MMM D • h:mm A') }}
+              </div>
               
-              <div class="text-4xl md:text-6xl font-extrabold text-center text-gray-900">
+              <div class="text-6xl mt-1 md:text-6xl font-extrabold text-center text-gray-900">
                 {{ Math.round(current?.temp_c || 0) }}°
               </div>
               
