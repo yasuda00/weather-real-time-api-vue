@@ -2,10 +2,28 @@
 import { defineProps, defineEmits, computed } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import dayjs from 'dayjs'
+import cloudImg from '@/assets/cloud.jpg';
+import darkCloudImg from '@/assets/darkCloud.jpg';
 
 const props = defineProps({
   visible: Boolean,
   weather: Object,
+})
+
+const getBackgroundStyle= computed(() =>{
+  const weatherData = props.weather
+  if (!weatherData?.current) return {}
+
+  const isDay = weatherData.current.is_day
+  return {
+    backgroundImage: `url(${isDay ? cloudImg : darkCloudImg})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundColor: isDay ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.6)',
+    backgroundBlendMode: 'overlay',
+    color: isDay ? '#111' : '#fff'
+  }
 })
 
 const localTime = computed(() =>
@@ -117,11 +135,11 @@ const airQualityInfo = computed(() => getAirQualityInfo(airQuality.value))
         >
           <DialogPanel class="w-full max-w-2xl lg:max-w-4xl min-h-[500px] md:min-h-[60vh] rounded-3xl bg-white p-0 overflow-hidden shadow-xl transition-all flex flex-col justify-start">
             <!-- Header Section -->
-            <div class="p-4 md:p-6 pb-3 text-gray-900 relative bg-gradient-to-br from-blue-50 to-indigo-100">
+            <div :style="getBackgroundStyle" class="p-4 md:p-6 pb-3 relative">
               <!-- Close button -->
               <button 
                 @click="emitClose"
-                class="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+                class="absolute top-3 right-3 p-1.5 hover:text-gray-600 transition-colors"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -138,15 +156,15 @@ const airQualityInfo = computed(() => getAirQualityInfo(airQuality.value))
                 />
               </DialogTitle>
 
-              <div class="text-sm text-center text-gray-600">
+              <div class="text-sm text-center">
                 {{ localTime?.format('dddd, MMM D • h:mm A') }}
               </div>
               
-              <div class="text-6xl mt-1 md:text-6xl font-extrabold text-center text-gray-900">
+              <div class="text-6xl mt-1 md:text-6xl font-extrabold text-center">
                 {{ Math.round(current?.temp_c || 0) }}°
               </div>
               
-              <div class="text-base md:text-xl text-center mb-2 text-gray-700">
+              <div class="text-base md:text-xl text-center mb-2">
                 {{ current?.condition?.text || 'Weather condition' }}
               </div>
               
@@ -162,28 +180,28 @@ const airQualityInfo = computed(() => getAirQualityInfo(airQuality.value))
               <!-- Additional Weather Info -->
               <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
                 <div class="text-center">
-                  <div class="text-xs text-gray-500">Feels Like</div>
+                  <div class="text-xs">Feels Like</div>
                   <div class="text-sm font-semibold">{{ Math.round(current?.feelslike_c || 0) }}°</div>
                 </div>
                 <div class="text-center">
-                  <div class="text-xs text-gray-500">Humidity</div>
+                  <div class="text-xs">Humidity</div>
                   <div class="text-sm font-semibold">{{ current?.humidity || 0 }}%</div>
                 </div>
                 <div class="text-center">
-                  <div class="text-xs text-gray-500">Wind</div>
+                  <div class="text-xs ">Wind</div>
                   <div class="text-sm font-semibold">{{ current?.wind_kph || 0 }} km/h</div>
                 </div>
                 <div class="text-center">
-                  <div class="text-xs text-gray-500">UV Index</div>
+                  <div class="text-xs ">UV Index</div>
                   <div class="text-sm font-semibold">{{ current?.uv || 0 }}</div>
                 </div>
               </div>
             </div>
-            <div class="px-4 md:px-6 pt-3 pb-4 flex-1 flex flex-col justify-between">
+            <div :class="current?.is_day === 0 ? 'bg-gray-950 text-white' : 'bg-gray-50'" class="px-4 md:px-6 pt-3 pb-4 flex-1 flex flex-col justify-between">
               <!-- Hourly forecast -->
               <div class="mb-4">
-                <h3 class="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h3 class="text-base font-semibol mb-3 flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   Hourly Forecast
@@ -194,7 +212,7 @@ const airQualityInfo = computed(() => getAirQualityInfo(airQuality.value))
                     :key="index"
                     class="flex flex-col items-center flex-shrink-0 min-w-[50px] md:min-w-[70px]"
                   >
-                    <div class="text-xs text-gray-500 mb-1">
+                    <div class="text-xs  mb-1">
                       {{ getHourDisplay(hour.time, index) }}
                     </div>
                     <img 
@@ -203,16 +221,16 @@ const airQualityInfo = computed(() => getAirQualityInfo(airQuality.value))
                       :alt="hour.condition?.text"
                       class="w-5 h-5 md:w-7 md:h-7 mb-1"
                     />
-                    <div class="text-xs md:text-base font-semibold text-gray-800">
+                    <div class="text-xs md:text-base font-semibold ">
                       {{ Math.round(hour.temp_c) }}°
                     </div>
                   </div>
                 </div>
               </div>
               <!-- 5-day forecast -->
-              <div class="bg-gray-50 rounded-xl p-3 md:p-4 shadow-sm">
-                <div class="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-2">
-                  <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <div class="rounded-xl p-3 md:p-4 shadow-sm">
+                <div class="text-sm font-semibold mb-3  flex items-center gap-2">
+                  <svg class="w-4 h-4 " fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <rect x="3" y="4" width="18" height="16" rx="2"/>
                     <path d="M16 2v4M8 2v4"/>
                   </svg>
@@ -224,7 +242,7 @@ const airQualityInfo = computed(() => getAirQualityInfo(airQuality.value))
                     :key="index"
                     class="flex items-center py-2 border-b border-gray-200 last:border-b-0"
                   >
-                    <div class="w-14 md:w-18 text-xs md:text-sm font-medium text-gray-900">
+                    <div class="w-14 md:w-18 text-xs md:text-sm font-medium ">
                       {{ index === 0 ? 'Today' : new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' }) }}
                     </div>
                     <div class="w-6 md:w-8 flex justify-center">
@@ -235,13 +253,13 @@ const airQualityInfo = computed(() => getAirQualityInfo(airQuality.value))
                         class="w-5 h-5 md:w-7 md:h-7"
                       />
                     </div>
-                    <div class="w-8 md:w-10 text-xs md:text-sm text-gray-500 text-right">
+                    <div class="w-8 md:w-10 text-xs md:text-sm  text-right">
                       {{ day.day?.mintemp_c || 0 }}<span class="align-super text-xs">°</span>
                     </div>
                     <div class="flex-1 flex items-center px-1 md:px-2">
                       <div class="w-full h-1.5 rounded-full bg-gradient-to-r from-blue-300 via-yellow-200 to-yellow-400"></div>
                     </div>
-                    <div class="w-8 md:w-10 text-xs md:text-sm text-gray-900 text-right font-semibold">
+                    <div class="w-8 md:w-10 text-xs md:text-sm  text-right font-semibold">
                       {{ day.day?.maxtemp_c || 0 }}<span class="align-super text-xs">°</span>
                     </div>
                   </div>

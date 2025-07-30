@@ -134,6 +134,7 @@ export function formatLocationData(location) {
     lon: location.lon,
     displayName: location.name,
     localtime: location.localtime,
+    localtime_epoch : location.localtime_epoch,
     tz_id: location.tz_id
   }
 }
@@ -160,6 +161,7 @@ export function formatWeatherData(weatherData) {
       uv: current.uv,
       last_updated: current.last_updated,
       air_quality: current.air_quality,
+      is_day: current.is_day
     },
     forecast: forecast?.forecastday?.map(day => ({
       date: day.date,

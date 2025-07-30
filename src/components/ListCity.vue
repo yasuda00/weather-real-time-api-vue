@@ -5,6 +5,8 @@ import { searchLocations, getWeatherData, formatWeatherData } from '../Api/weath
 import search from '@/assets/search-city.png'
 import { useToast } from 'vue-toastification'
 import dayjs from 'dayjs'
+import cloudImg from '@/assets/cloud.jpg';
+import darkCloudImg from '@/assets/darkCloud.jpg';
 
 
 
@@ -317,6 +319,22 @@ function openDialog() {
   showDialog.value = true
     }
 }
+
+function getBackgroundStyle(weatherData) {
+  if (!weatherData?.current) return {}
+
+  const isDay = weatherData.current.is_day
+  return {
+    backgroundImage: `url(${isDay ? cloudImg : darkCloudImg})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundColor: isDay ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.6)',
+    backgroundBlendMode: 'overlay',
+    color: isDay ? '#111' : '#fff'
+  }
+}
+
 </script>
 
 <template>
@@ -391,11 +409,12 @@ function openDialog() {
 
                 <!-- Weather data -->
                 <div v-else-if="weatherData"
-                    class="bg-white mb-4 rounded-2xl overflow-hidden shadow flex items-center min-h-[110px] relative"
-                    style="cursor:pointer;" @click="openDialog">
+                    class="rounded-2xl overflow-hidden shadow flex items-center min-h-[110px] relative"
+                    :style="[getBackgroundStyle(weatherData), { cursor: 'pointer' }]" 
+                    @click="openDialog">
                     <!-- Save button -->
                     <button @click.stop="addToSaved(selectedLocation)"
-                        class="absolute top-3 right-3 p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                        class="absolute top-3 right-3 p-1  hover:text-blue-500 transition-colors"
                         title="Save location">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -404,31 +423,31 @@ function openDialog() {
                     </button>
 
                     <span
-                        class="absolute top-3 right-12 text-xs text-gray-500 bg-gray-100 rounded px-2 py-0.5 font-mono">
+                        class="absolute top-3 right-12 text-xs text-gray-900 bg-gray-300 rounded px-2 py-0.5 font-mono">
                         {{ weatherData.location.country }}
                     </span>
           <div class="flex-1 px-5 py-4 flex flex-col justify-between">
-            <div class="flex flex-row items-center gap-2">
-                            <span class="text-xl font-bold text-gray-900">{{ weatherData.location.displayName }}</span>
-                            <span class="text-xs text-gray-500">{{ weatherData.location.region }}</span>
+            <div class="flex flex-row items-center gap-2 mt-5">
+                            <span class="text-xl font-bold ">{{ weatherData.location.displayName }}</span>
+                            <span class="text-xs ">{{ weatherData.location.region }}</span>
                         </div>
-                        <span class="text-xs text-gray-500 mt-1">
+                        <span class="text-xs  mt-1">
                             {{dayjs(weatherData.location.localtime).format('h:mm A') }}</span>
                         <div class="flex items-center gap-2 mt-2">
                             <img v-if="weatherData.current.condition.icon" :src="weatherData.current.condition.icon"
                                 :alt="weatherData.current.condition.text" class="w-10 h-10" />
-                            <span class="text-gray-500 text-sm">{{ weatherData.current.condition.text }}</span>
+                            <span class=" text-sm">{{ weatherData.current.condition.text }}</span>
                         </div>
                     </div>
                     <div class="flex flex-col items-end justify-center h-full pr-6 py-4 gap-1 mt-5">
                         <div class="flex flex-row items-center gap-2">
-                            <span class="text-3xl font-bold text-gray-900">{{ weatherData.current.temp_c || '--' }}<span
+                            <span class="text-3xl font-bold ">{{ weatherData.current.temp_c || '--' }}<span
                                     class="align-super text-xl">°</span></span>
                         </div>
                         <div class="flex flex-row items-center gap-2">
-                            <span class="text-xs text-gray-500">{{ weatherData.forecast[0]?.day.mintemp_c || '--' }}° -
+                            <span class="text-xs ">{{ weatherData.forecast[0]?.day.mintemp_c || '--' }}° -
                                 {{ weatherData.forecast[0]?.day.maxtemp_c || '--' }}°</span>
-                            <span class="text-xs text-gray-500">Feels like {{ weatherData.current.feelslike_c || '--'
+                            <span class="text-xs ">Feels like {{ weatherData.current.feelslike_c || '--'
                                 }}°</span>
                         </div>
                     </div>
@@ -479,12 +498,12 @@ function openDialog() {
           </div>
 
                     <!-- Weather data -->
-                    <div v-else class="bg-white rounded-2xl overflow-hidden shadow flex items-center min-h-[110px] relative"
-                        style="cursor:pointer;"
+                    <div v-else class="rounded-2xl overflow-hidden shadow flex items-center min-h-[110px] relative"
+                        :style="[getBackgroundStyle(location.weatherData), { cursor: 'pointer' }]"
                         @click="() => { selectedWeather = location.weatherData; showDialog = true }">
                         <!-- Remove button -->
                         <button @click.stop="removeFromSaved(location.id)"
-                            class="absolute top-3 right-3 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                            class="absolute top-3 right-3 p-1 hover:text-red-500 transition-colors"
                             title="Remove from saved">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -493,18 +512,18 @@ function openDialog() {
                         </button>
 
                         <span
-                            class="absolute top-3 right-12 text-xs text-gray-500 bg-gray-100 rounded px-2 py-0.5 font-mono">
+                            class="absolute top-3 right-12 text-xs text-gray-900 bg-gray-300 rounded px-2 py-0.5 font-mono">
                             {{ location.weatherData.location.country }}
             </span>
 
                         <div class="flex-1 px-5 py-4 flex flex-col justify-between">
                             <div class="flex flex-row items-center gap-2">
-                                <span class="text-xl font-bold text-gray-900">{{
+                                <span class="text-xl font-bold">{{
                                     location.weatherData.location.displayName }}</span>
-                                <span class="text-xs text-gray-500">{{ location.weatherData.location.region }}</span>
+                                <span class="text-xs">{{ location.weatherData.location.region }}</span>
                             </div>
                             <div class="flex flex-row items-center gap-2">
-                                <span class="text-xs text-gray-500"> 
+                                <span class="text-xs"> 
                                     {{ dayjs(location.weatherData.location.localtime).format('h:mm A') }}
                                 </span>
                             </div>
@@ -512,19 +531,19 @@ function openDialog() {
                                 <img v-if="location.weatherData.current.condition.icon"
                                     :src="location.weatherData.current.condition.icon"
                                     :alt="location.weatherData.current.condition.text" class="w-10 h-10" />
-                                <span class="text-gray-500 text-sm">{{ location.weatherData.current.condition.text
+                                <span class="text-sm">{{ location.weatherData.current.condition.text
                                     }}</span>
                             </div>
                         </div>
                         <div class="flex flex-col items-end justify-center h-full pr-6 py-4 gap-1 mt-5">
                             <div class="flex flex-row items-center gap-2">
-                                <span class="text-3xl font-bold text-gray-900">{{ location.weatherData.current.temp_c ||
+                                <span class="text-3xl font-bold">{{ location.weatherData.current.temp_c ||
                                     '--' }}<span class="align-super text-xl">°</span></span>
                             </div>
                             <div class="flex flex-row items-center gap-2">
-                                <span class="text-xs text-gray-500">{{ location.weatherData.forecast[0]?.day.mintemp_c
+                                <span class="text-xs ">{{ location.weatherData.forecast[0]?.day.mintemp_c
                                     || '--' }}° - {{ location.weatherData.forecast[0]?.day.maxtemp_c || '--' }}°</span>
-                                <span class="text-xs text-gray-500">Feels like {{
+                                <span class="text-xs ">Feels like {{
                                     location.weatherData.current.feelslike_c || '--' }}°</span>
                             </div>
             </div>
