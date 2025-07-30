@@ -517,7 +517,7 @@ function getBackgroundStyle(weatherData) {
             </span>
 
                         <div class="flex-1 px-5 py-4 flex flex-col justify-between">
-                            <div class="flex flex-row items-center gap-2">
+                            <div class="flex flex-row items-center gap-2 mt-5">
                                 <span class="text-xl font-bold">{{
                                     location.weatherData.location.displayName }}</span>
                                 <span class="text-xs">{{ location.weatherData.location.region }}</span>
